@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 type Props = {
   error: Error;
@@ -13,81 +12,42 @@ export default function GlobalError({ error, reset }: Props) {
   const router = useRouter();
 
   useEffect(() => {
-    // Log the error to the console (or send to analytics)
+    // Log the error to console or send to monitoring/analytics
     console.error("Global error boundary:", error);
   }, [error]);
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-        boxSizing: "border-box",
-      }}
-    >
-      <div style={{ maxWidth: 720, textAlign: "center" }}>
-        <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-          Something went wrong
-        </h1>
-        <p style={{ color: "#666", marginBottom: "1rem" }}>
-          An unexpected error occurred. If the problem persists, try reloading
-          or return to the homepage.
+    <main className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white">
+      <div className="max-w-lg w-full text-center">
+        <h1 className="text-2xl font-semibold mb-2">Something went wrong</h1>
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
+          An unexpected error occurred. You can try reloading the page or go back to the homepage.
         </p>
 
-        <pre
-          style={{
-            background: "#f8f8f8",
-            padding: 12,
-            borderRadius: 6,
-            color: "#111",
-            maxHeight: 160,
-            overflow: "auto",
-            textAlign: "left",
-            marginBottom: 12,
-          }}
-        >
+        <pre className="bg-gray-100 dark:bg-gray-800 text-left p-3 rounded max-h-40 overflow-auto mb-4 text-sm">
           {error?.message}
         </pre>
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+        <div className="flex justify-center gap-3">
           <button
             onClick={() => {
               try {
                 reset();
               } catch (_) {
-                // fallback
                 router.refresh();
               }
             }}
-            style={{
-              padding: "0.6rem 1rem",
-              borderRadius: 6,
-              cursor: "pointer",
-            }}
+            className="px-4 py-2 border rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition"
           >
-            Try again
+            Try Again
           </button>
 
           <button
             onClick={() => router.push("/")}
-            style={{
-              padding: "0.6rem 1rem",
-              borderRadius: 6,
-              background: "#0b61ff",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
           >
             Home
           </button>
-
-          <Link href="/">
-            <a style={{ display: "none" }}>hidden</a>
-          </Link>
         </div>
       </div>
     </main>

@@ -52,7 +52,11 @@ const menuSections = [
   },
 ];
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, name, isActive = false }) => (
+const MenuItem: React.FC<MenuItemProps> = ({
+  icon: Icon,
+  name,
+  isActive = false,
+}) => (
   <div
     className={`flex items-center p-3 my-0.5 rounded-lg transition-colors cursor-pointer text-sm
       ${
@@ -64,7 +68,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, name, isActive = false 
     <Icon className="w-5 h-5 mr-3" />
     <span>{name}</span>
   </div>
-);  
+);
 
 interface MenuItemProps {
   icon: React.ComponentType<{ className?: string }>;
@@ -105,8 +109,8 @@ const MenuSection: React.FC<MenuSectionProps> = ({ section }) => {
 
       {isOpen && (
         <nav>
-          {section.links.map((link, index) => (
-            <MenuItem key={index} {...link} />
+          {section.links.map((link) => (
+            <MenuItem key={link.name} {...link} />
           ))}
         </nav>
       )}
@@ -121,7 +125,9 @@ const Sidebar: React.FC = () => {
 
   const avatarSrc =
     user?.avatarUrl ||
-    `https://picsum.photos/200?random=${user?._id || Math.floor(Math.random() * 1000)}`;
+    `https://picsum.photos/200?random=${
+      user?._id || Math.floor(Math.random() * 1000)
+    }`;
 
   return (
     <>
@@ -144,9 +150,15 @@ const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-screen w-64 p-4 z-[9999] shadow-2xl rounded-r-xl
-          ${COLORS.BACKGROUND_PRIMARY} ${COLORS.TEXT_PRIMARY} border ${COLORS.BORDER_COLOR}
+          ${COLORS.BACKGROUND_PRIMARY} ${COLORS.TEXT_PRIMARY} border ${
+          COLORS.BORDER_COLOR
+        }
           transform transition-transform duration-300
-          ${open ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none"}
+          ${
+            open
+              ? "translate-x-0 pointer-events-auto"
+              : "-translate-x-full pointer-events-none"
+          }
           md:translate-x-0 md:pointer-events-auto md:static`}
       >
         {/* Close Button Mobile */}
@@ -158,13 +170,15 @@ const Sidebar: React.FC = () => {
 
         {/* Logo */}
         <div className="flex items-center mb-8 pt-1">
-          <h1 className="text-3xl pl-1 font-serif italic text-white">DZINR-APP</h1>
+          <h1 className="text-3xl pl-1 font-serif italic text-white">
+            DZINR-APP
+          </h1>
         </div>
 
         {/* Menu Sections */}
         <div className="flex-grow overflow-y-auto pr-1 custom-scroll">
-          {menuSections.map((section, index) => (
-            <MenuSection key={index} section={section} />
+          {menuSections.map((section) => (
+            <MenuSection key={section.title} section={section} />
           ))}
         </div>
 
@@ -216,7 +230,9 @@ const Sidebar: React.FC = () => {
             <div className="w-12 h-6 bg-gray-600 rounded-full peer-checked:bg-white transition-colors duration-300"></div>
             <div
               className={`absolute top-0.5 left-[3px] w-5 h-5 rounded-full transition-transform duration-300 shadow-lg ${
-                isDarkMode ? "translate-x-[20px] bg-black" : "translate-x-0 bg-white"
+                isDarkMode
+                  ? "translate-x-[20px] bg-black"
+                  : "translate-x-0 bg-white"
               }`}
             />
           </label>

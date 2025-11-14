@@ -28,7 +28,12 @@ export async function POST(req) {
     return NextResponse.json(
       {
         message: "Registration successful",
-        user: { _id: user._id, name: user.name, email: user.email },
+        user: { 
+          _id: user._id, 
+          name: user.name, 
+          email: user.email,
+          avatarUrl: user.avatarUrl 
+        },
         token,
       },
       { status: 201 }

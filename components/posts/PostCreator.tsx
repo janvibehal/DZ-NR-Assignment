@@ -1,20 +1,20 @@
 "use client";
+
 import React, { useState } from "react";
-import { Edit, MoreHorizontal } from "lucide-react";
-import PostContentModal from "./PostContentModal";
-import { useAuth } from "@/context/AuthContext"; 
+import { Edit } from "lucide-react";
+import PostContentModal, { MediaItem } from "./PostContentModal";
+import { useAuth } from "../../context/AuthContext";
 
 const MOCK_AVATAR = "https://picsum.photos/40/40?random=1";
 
 const PostCreator: React.FC = () => {
   const [isPostModalOpen, setPostModalOpen] = useState(false);
-  const [attachedVideo, setAttachedVideo] = useState<File | null>(null);
-  const [attachedVideoPreview, setAttachedVideoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { user, token } = useAuth(); 
+  const { user } = useAuth();
+  const token = user?.token;
 
-  const handlePost = async (content: string, videoFile?: File | null) => {
+  const handlePost = async (content: string, media?: MediaItem[]) => {
     if (!user) {
       alert("You must be logged in to post.");
       return;
@@ -22,22 +22,20 @@ const PostCreator: React.FC = () => {
 
     try {
       setLoading(true);
-
       const formData = new FormData();
       formData.append("text", content);
 
-      if (videoFile) {
-        formData.append("media", videoFile);
-        formData.append("mediaType", "video");
-      }
+      media?.forEach((item) => {
+        formData.append("mediaFile", item.file);
+        formData.append("mediaType", item.type);
+      });
 
       const res = await fetch("/api/posts", {
         method: "POST",
         body: formData,
-        credentials: "include",
         headers: token
           ? {
-              Authorization: `Bearer ${token}`, 
+              Authorization: `Bearer ${token}`,
             }
           : {},
       });
@@ -46,11 +44,9 @@ const PostCreator: React.FC = () => {
 
       if (res.ok) {
         console.log("Post created successfully:", data);
-        setAttachedVideo(null);
-        setAttachedVideoPreview(null);
         setPostModalOpen(false);
       } else {
-        console.error(" Error creating post:", data.message);
+        console.error("Error creating post:", data.message);
         alert(`Failed to post: ${data.message}`);
       }
     } catch (err) {
@@ -93,10 +89,7 @@ const PostCreator: React.FC = () => {
       <PostContentModal
         isOpen={isPostModalOpen}
         onClose={() => setPostModalOpen(false)}
-        onPost={handlePost}
-        initialVideoFile={attachedVideo}
-        initialVideoPreview={attachedVideoPreview}
-        loading={loading}
+        onPost={handlePost} 
       />
     </div>
   );

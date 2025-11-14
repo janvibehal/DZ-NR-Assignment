@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import PostCreator from "./PostCreator";
 import PostCard from "./PostCard";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface PostFromBackend {
   _id: string;
@@ -13,12 +13,12 @@ interface PostFromBackend {
   createdAt: string;
   text: string;
   media?: { _id: string; url: string; type: "image" | "video"; alt?: string }[];
-  likes?: { _id: string; name }[];
+  likes?: { _id: string; name : string}[];
   comments?: any[];
   sharedCount?: number;
 }
 
-const MiddleContent: React.FC = () => {
+const MiddleContent: React.FC<{ className?: string }> = ({ className }) => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<PostFromBackend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ const MiddleContent: React.FC = () => {
   }, []);
 
   return (
-    <main className="flex-1 h-screen p-4 space-y-4 overflow-y-auto scrollbar-custom relative md:ml-64 md:mr-72 mx-auto max-w-4xl sm:px-6 lg:px-8">
+    <main className={`${className} flex-1 h-screen p-4 space-y-4 overflow-y-auto scrollbar-custom relative`}>
       <PostCreator />
       {loading
         ? Array.from({ length: 3 }).map((_, idx) => <PostCard key={idx} postId="" />)

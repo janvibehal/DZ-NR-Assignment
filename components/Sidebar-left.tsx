@@ -16,7 +16,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const COLORS = {
   BACKGROUND_PRIMARY: "bg-[#131313]",
@@ -52,7 +52,7 @@ const menuSections = [
   },
 ];
 
-const MenuItem = ({ icon: Icon, name, isActive = false }) => (
+const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, name, isActive = false }) => (
   <div
     className={`flex items-center p-3 my-0.5 rounded-lg transition-colors cursor-pointer text-sm
       ${
@@ -64,10 +64,30 @@ const MenuItem = ({ icon: Icon, name, isActive = false }) => (
     <Icon className="w-5 h-5 mr-3" />
     <span>{name}</span>
   </div>
-);
+);  
 
-const MenuSection = ({ section }) => {
-  const [isOpen, setIsOpen] = useState(section.defaultOpen);
+interface MenuItemProps {
+  icon: React.ComponentType<{ className?: string }>;
+  name: string;
+  isActive?: boolean;
+}
+
+interface MenuLink {
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive?: boolean;
+}
+
+interface MenuSectionProps {
+  section: {
+    title: string;
+    links: MenuLink[];
+    defaultOpen?: boolean;
+  };
+}
+
+const MenuSection: React.FC<MenuSectionProps> = ({ section }) => {
+  const [isOpen, setIsOpen] = useState(section.defaultOpen ?? true);
 
   return (
     <div className="mb-6">

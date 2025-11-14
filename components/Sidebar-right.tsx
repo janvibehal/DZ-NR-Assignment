@@ -3,12 +3,21 @@
 import React, { useState } from "react";
 import { X, MessageCircle, MoreHorizontal } from "lucide-react";
 
-const mockRequests = [
+interface ContactItemProps {
+  id: number;
+  name: string;
+  avatar: string;
+  unread?: number;
+  status?: string;
+  isRequest?: boolean;
+}
+
+const mockRequests: ContactItemProps[] = [
   { id: 1, name: "Tyrell Barrows", avatar: "https://picsum.photos/40/40?random=1", status: "wants to add you to friends" },
   { id: 2, name: "Selena Gomez", avatar: "https://picsum.photos/40/40?random=2", status: "wants to add you to friends" },
 ];
 
-const mockContacts = [
+const mockContacts: ContactItemProps[] = [
   { id: 101, name: "Amanda Miles", avatar: "https://picsum.photos/40/40?random=3" },
   { id: 102, name: "Melissa Byron", avatar: "https://picsum.photos/40/40?random=4" },
   { id: 103, name: "Ronald Bezos", avatar: "https://picsum.photos/40/40?random=5", unread: 3 },
@@ -17,7 +26,7 @@ const mockContacts = [
   { id: 106, name: "Kurt Williamson", avatar: "https://picsum.photos/40/40?random=8" },
 ];
 
-const ContactItem = ({ name, avatar, unread, status, isRequest = false }) => (
+const ContactItem: React.FC<ContactItemProps> = ({ name, avatar, unread = 0, status, isRequest = false }) => (
   <div className={`flex items-start p-3 ${isRequest ? "bg-[#242424] mb-3" : ""} rounded-xl hover:bg-[#2c2c2c] transition duration-150`}>
     <img src={avatar} alt={name} className="w-10 h-10 rounded-lg mr-3" />
     <div className="flex-1 min-w-0">
@@ -33,7 +42,11 @@ const ContactItem = ({ name, avatar, unread, status, isRequest = false }) => (
       ) : (
         <div className="flex justify-between items-center h-5">
           <p className="text-sm text-gray-500">Online</p>
-          {unread ? <span className="bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{unread}</span> : <MoreHorizontal className="w-5 h-5 text-gray-500 hover:text-gray-300" />}
+          {unread ? (
+            <span className="bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{unread}</span>
+          ) : (
+            <MoreHorizontal className="w-5 h-5 text-gray-500 hover:text-gray-300" />
+          )}
         </div>
       )}
     </div>

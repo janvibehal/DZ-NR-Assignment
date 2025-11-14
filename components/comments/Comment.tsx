@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import CommentThread, { CommentType } from "./CommentThread";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface CommentProps {
   currentUserCommentAvatar: string;
@@ -139,12 +139,12 @@ const Comment: React.FC<CommentProps> = ({
                 likesCount: 0,
                 likedByMe: false,
               };
-              return { ...comment, replies: [...comment.replies, newReply] };
+              return { ...comment, replies: [...(comment.replies || []), newReply] };
             }
-            if (comment.replies.length > 0) {
+            if ((comment.replies || []).length > 0) {
               return {
                 ...comment,
-                replies: addReplyRecursively(comment.replies),
+                replies: addReplyRecursively(comment.replies || []),
               };
             }
             return comment;

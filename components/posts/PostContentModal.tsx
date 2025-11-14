@@ -1,10 +1,11 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { X, Image, Video, Smile } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { useAuth } from "@/context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
 
-interface MediaItem {
+export interface MediaItem {
   file: File;
   preview: string;
   type: "image" | "video";
@@ -13,6 +14,7 @@ interface MediaItem {
 interface PostContentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPost?: (content: string, media?: MediaItem[]) => Promise<void>;
   onPostSuccess?: () => void;
   initialMedia?: MediaItem[];
 }
@@ -34,7 +36,7 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
   if (!isOpen) return null;
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       setVideoFile(e.target.files[0]);
       setVideoPreview(URL.createObjectURL(e.target.files[0]));
     }
@@ -42,7 +44,7 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files?.[0]) {
       setVideoFile(e.dataTransfer.files[0]);
       setVideoPreview(URL.createObjectURL(e.dataTransfer.files[0]));
     }
@@ -50,6 +52,7 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
 
   const handleNext = () => {
     onNext(videoFile, videoPreview);
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
     setVideoFile(null);
     setVideoPreview(null);
     onClose();
@@ -119,31 +122,28 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
   );
 };
 
-
 const PostContentModal: React.FC<PostContentModalProps> = ({
   isOpen,
   onClose,
+  onPost,
   onPostSuccess,
   initialMedia,
 }) => {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<MediaItem[]>(initialMedia || []);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     setMedia(initialMedia || []);
     setContent("");
-  }, [initialMedia, isOpen]); 
+  }, [initialMedia, isOpen]);
 
   useEffect(() => {
-    return () => {
-      media.forEach(item => URL.revokeObjectURL(item.preview));
-    };
-  }, [media]); 
-
+    return () => media.forEach((item) => URL.revokeObjectURL(item.preview));
+  }, [media]);
 
   const handleMediaSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -156,7 +156,7 @@ const PostContentModal: React.FC<PostContentModalProps> = ({
       type,
     }));
     setMedia((prev) => [...prev, ...filesArray]);
-    e.target.value = ''; 
+    e.target.value = "";
   };
 
   const handleRemoveMedia = (index: number) => {
@@ -176,56 +176,43 @@ const PostContentModal: React.FC<PostContentModalProps> = ({
   };
 
   const handleClose = () => {
-    media.forEach(item => URL.revokeObjectURL(item.preview)); 
-    setMedia([]); 
-    setContent(""); 
-    onClose(); 
+    media.forEach((item) => URL.revokeObjectURL(item.preview));
+    setMedia([]);
+    setContent("");
+    onClose();
   };
 
   const handlePostClick = async () => {
     if (!content.trim() && media.length === 0) return;
+    if (!user?.token) return alert("Authentication failed");
+
     setLoading(true);
-
-    if (!user || !user.token) {
-        console.error("❌ Post failed: User is not authenticated or token is missing.");
-        alert("Authentication failed. Please log in again.");
-        setLoading(false);
-        return;
-    }
-    
-    let mediaCleanup: string[] = [];
-
     try {
-      const formData = new FormData();
-      formData.append("text", content);
-      
-      media.forEach((item) => {
-      
-        formData.append(`mediaFile`, item.file); 
-        formData.append(`mediaType`, item.type); 
-        mediaCleanup.push(item.preview);
-      });
+      if (onPost) {
+        await onPost(content, media);
+      } else {
+        const formData = new FormData();
+        formData.append("text", content);
+        media.forEach((item) => {
+          formData.append("mediaFile", item.file);
+          formData.append("mediaType", item.type);
+        });
 
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to create post. Status: ${res.status}`); 
+        const res = await fetch("/api/posts", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user.token}` },
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Failed to post");
       }
 
       onPostSuccess?.();
-      handleClose(); 
-    } catch (error) {
-      console.error("❌ Post failed:", error);
-      alert("Failed to upload post: " + (error as Error).message);
+      handleClose();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload post");
     } finally {
       setLoading(false);
-      mediaCleanup.forEach(url => URL.revokeObjectURL(url));
     }
   };
 
@@ -244,7 +231,12 @@ const PostContentModal: React.FC<PostContentModalProps> = ({
 
           <div className="flex items-center mb-4">
             <img
-              src={user?.profilePic || "https://picsum.photos/200"}
+              src={
+                user?.avatarUrl ||
+                `https://placehold.co/50x50/3498db/ffffff?text=${
+                  user?.name?.charAt(0) || "U"
+                }`
+              }
               alt="Profile"
               className="w-10 h-10 rounded-full object-cover mr-3"
             />
@@ -321,6 +313,7 @@ const PostContentModal: React.FC<PostContentModalProps> = ({
               <Video className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
+
           <button
             onClick={handlePostClick}
             disabled={loading || (!content.trim() && media.length === 0)}

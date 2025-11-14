@@ -14,6 +14,7 @@ interface User {
   name: string;
   email?: string;
   token: string;
+  avatarUrl?: string;
 }
 
 

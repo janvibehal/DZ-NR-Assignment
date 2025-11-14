@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export interface CommentType {
   _id: string;
@@ -24,8 +24,6 @@ interface CommentThreadProps {
   parentCommentId?: string;
   onReplyAdded?: (reply: CommentType) => void;
 }
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "";
 
 const CommentThread: React.FC<CommentThreadProps> = ({
   comment,
@@ -54,7 +52,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 
     setLoadingLike(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/comments/likes/${comment._id}`, {
+      const res = await fetch(`/api/comments/likes/${comment._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +61,6 @@ const CommentThread: React.FC<CommentThreadProps> = ({
       });
 
       const data = await res.json();
-
       if (res.ok && data.success) {
         setLiked(!liked);
         setLikesCount(data.likes);
@@ -76,7 +73,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({
   };
 
   const handleAddReply = async (text: string) => {
-    const userId = user?._id || user?.id || user?.userId || user?.user?._id;
+    const userId = user?._id;
 
     if (!text.trim() || !userId) {
       console.error("User ID missing → cannot send reply");
@@ -84,7 +81,6 @@ const CommentThread: React.FC<CommentThreadProps> = ({
     }
 
     setLoadingReply(true);
-
     try {
       const res = await fetch(`/api/comments/replies/${topCommentId}`, {
         method: "POST",
@@ -110,6 +106,8 @@ const CommentThread: React.FC<CommentThreadProps> = ({
       setReplies((prev) => [...prev, newReply]);
       setReplyText("");
       setShowReplyInput(false);
+
+      if (onReplyAdded) onReplyAdded(newReply);
     } catch (err) {
       console.error("Error adding reply:", err);
     } finally {
@@ -169,9 +167,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({
                 placeholder="Write a reply..."
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && handleAddReply(replyText)
-                }
+                onKeyDown={(e) => e.key === "Enter" && handleAddReply(replyText)}
               />
               <button
                 onClick={() => handleAddReply(replyText)}

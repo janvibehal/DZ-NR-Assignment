@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "../../../lib/dbConnect";
 import Post from "../../../models/Post"; 
 import User from "../../../models/User";
-import cloudinary from "@/utils/cloudinary"; 
+import cloudinary from "../../../utils/cloudinary"; 
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";

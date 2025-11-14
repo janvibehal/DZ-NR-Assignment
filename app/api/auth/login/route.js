@@ -28,13 +28,19 @@ export async function POST(req) {
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
     return NextResponse.json(
-      {
-        message: "Login successful",
-        user: { _id: user._id, name: user.name, email: user.email },
-        token,
-      },
-      { status: 200 }
-    );
+  {
+    message: "Login successful",
+    user: { 
+      _id: user._id, 
+      name: user.name, 
+      email: user.email,
+      avatarUrl: user.avatarUrl
+    },
+    token,
+  },
+  { status: 200 }
+);
+
   } catch (err) {
     console.error("Login Error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });

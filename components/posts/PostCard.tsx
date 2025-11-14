@@ -5,7 +5,7 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import Comment from "../comments/Comment";
 import PostCardSkeleton from "./PostCardSkeleton";
 import CommentSkeleton from "../comments/CommentSkeleton";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface MediaItem {
   id: string;
@@ -50,55 +50,70 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
 
   const postLiked = post?.likes.some((like) => like._id === user?._id) || false;
   const likedNames =
-    post?.likes.filter((like) => like._id !== user?._id).map((like) => like.name) || [];
+    post?.likes
+      .filter((like) => like._id !== user?._id)
+      .map((like) => like.name) || [];
   const totalLikesCount = post?.likes.length || 0;
 
   useEffect(() => {
-  const fetchPost = async () => {
-    if (!postId || !user?.token) return;
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/posts/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch post");
-      const data = await res.json();
-      const postData = data.post || data;
-
-      setPost({
-        id: postData._id,
-        userAvatarUrl: postData.author?.avatarUrl || `https://placehold.co/50x50/3498db/ffffff?text=${postData.author?.name?.charAt(0) || "U"}`,
-        name: postData.author?.name || "Unknown User",
-        feeling: postData.feeling,
-        withUser: postData.withUser,
-        postDate: new Date(postData.createdAt).toLocaleString(),
-        postText: postData.text,
-        media: postData.media?.map((m: any) => ({ id: m._id, url: m.url, type: m.type })) || [],
-        likes: postData.likes || [],
-        comments: postData.comments?.map((c: any) => ({
-          id: c._id,
-          author: {
-            _id: c.author?._id || "",
-            name: c.author?.name || "Unknown",
-            avatarUrl: c.author?.avatarUrl || `https://placehold.co/50x50/3498db/ffffff?text=${c.author?.name?.charAt(0) || "U"}`,
+    const fetchPost = async () => {
+      if (!postId || !user?.token) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/posts/${postId}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
           },
-          text: c.text,
-          replies: c.replies || [],
-        })) || [],
-      });
-    } catch (err) {
-      console.error("Error fetching post:", err);
-      setPost(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+        });
+        if (!res.ok) throw new Error("Failed to fetch post");
+        const data = await res.json();
+        const postData = data.post || data;
 
-  fetchPost();
-}, [postId, user?.token]);
+        setPost({
+          id: postData._id,
+          userAvatarUrl:
+            postData.author?.avatarUrl ||
+            `https://placehold.co/50x50/3498db/ffffff?text=${
+              postData.author?.name?.charAt(0) || "U"
+            }`,
+          name: postData.author?.name || "Unknown User",
+          feeling: postData.feeling,
+          withUser: postData.withUser,
+          postDate: new Date(postData.createdAt).toLocaleString(),
+          postText: postData.text,
+          media:
+            postData.media?.map((m: any) => ({
+              id: m._id,
+              url: m.url,
+              type: m.type,
+            })) || [],
+          likes: postData.likes || [],
+          comments:
+            postData.comments?.map((c: any) => ({
+              id: c._id,
+              author: {
+                _id: c.author?._id || "",
+                name: c.author?.name || "Unknown",
+                avatarUrl:
+                  c.author?.avatarUrl ||
+                  `https://placehold.co/50x50/3498db/ffffff?text=${
+                    c.author?.name?.charAt(0) || "U"
+                  }`,
+              },
+              text: c.text,
+              replies: c.replies || [],
+            })) || [],
+        });
+      } catch (err) {
+        console.error("Error fetching post:", err);
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchPost();
+  }, [postId, user?.token]);
 
   const togglePostLike = async () => {
     if (!post || !user?.token) return;
@@ -146,7 +161,6 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
 
   return (
     <div className="bg-white dark:bg-[#131313] rounded-lg shadow-lg dark:shadow-2xl p-4 w-full mx-auto border border-gray-200 dark:border-gray-700 mb-6">
-
       <div className="flex items-center mb-3">
         <img
           src={post.userAvatarUrl}
@@ -158,7 +172,8 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
             {post.name}
             {post.feeling && (
               <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
-                is feeling {post.feeling} {post.feeling === "excited" ? "🤩" : ""}
+                is feeling {post.feeling}{" "}
+                {post.feeling === "excited" ? "🤩" : ""}
               </span>
             )}
             {post.withUser && (
@@ -167,27 +182,41 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
               </span>
             )}
           </div>
-          <div className="text-gray-500 dark:text-gray-400 text-xs">{post.postDate}</div>
+          <div className="text-gray-500 dark:text-gray-400 text-xs">
+            {post.postDate}
+          </div>
         </div>
       </div>
 
-
-      <p className="text-gray-800 dark:text-gray-200 mb-3 text-sm whitespace-pre-wrap">{post.postText}</p>
+      <p className="text-gray-800 dark:text-gray-200 mb-3 text-sm whitespace-pre-wrap">
+        {post.postText}
+      </p>
 
       {post.media.length > 0 && (
-        <div className={`grid gap-2 mb-4 ${post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+        <div
+          className={`grid gap-2 mb-4 ${
+            post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}
+        >
           {post.media.map((item) => (
             <div key={item.id} className="relative w-full h-52">
               {item.type === "video" ? (
-                <video controls src={item.url} className="w-full h-full object-cover rounded-md" />
+                <video
+                  controls
+                  src={item.url}
+                  className="w-full h-full object-cover rounded-md"
+                />
               ) : (
-                <img src={item.url} alt={item.type} className="w-full h-full object-cover rounded-md" />
+                <img
+                  src={item.url}
+                  alt={item.type}
+                  className="w-full h-full object-cover rounded-md"
+                />
               )}
             </div>
           ))}
         </div>
       )}
-
 
       <div className="flex justify-around border-t border-b border-gray-200 dark:border-gray-700 py-2 mb-3">
         <button
@@ -198,8 +227,13 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
               : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
         >
-          <Heart className="w-5 h-5" fill={postLiked ? "currentColor" : "none"} />
-          <span className="text-sm font-medium">{postLiked ? "Liked" : "Like"}</span>
+          <Heart
+            className="w-5 h-5"
+            fill={postLiked ? "currentColor" : "none"}
+          />
+          <span className="text-sm font-medium">
+            {postLiked ? "Liked" : "Like"}
+          </span>
         </button>
 
         <button
@@ -218,7 +252,11 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
             const shareText = `Check out this post by ${post.name}: ${post.postText}`;
             try {
               if (navigator.share) {
-                await navigator.share({ title: `Post by ${post.name}`, text: shareText, url: postUrl });
+                await navigator.share({
+                  title: `Post by ${post.name}`,
+                  text: shareText,
+                  url: postUrl,
+                });
               } else {
                 const tempInput = document.createElement("textarea");
                 tempInput.value = `${shareText}\n${postUrl}`;
@@ -234,7 +272,9 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
             setSharing(false);
           }}
           className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
-            sharing ? "text-gray-400 cursor-not-allowed" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+            sharing
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
         >
           <Share2 className="w-5 h-5" />
@@ -258,10 +298,9 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
 
       {showComments && (
         <Comment
-          currentUserCommentAvatar={
-            user?.profilePic ||
-            `https://placehold.co/50x50/3498db/ffffff?text=${user?.name?.charAt(0) || "U"}`
-          }
+          currentUserCommentAvatar={`https://placehold.co/50x50/3498db/ffffff?text=${
+            user?.name?.charAt(0) || "U"
+          }`}
           postId={postId}
         />
       )}

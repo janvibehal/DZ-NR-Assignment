@@ -1,29 +1,37 @@
 "use client";
 
-import SidebarLeft from "../components/Sidebar-left";
-import SidebarRight from "../components/Sidebar-right";
+import SidebarLeft from "../components/Sidebars/Sidebar-left";
+import SidebarRight from "../components/Sidebars/Sidebar-right";
 import MiddleContent from "../components/posts/MiddleContent";
+import Navbar from "../components/navigation/Navbar";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
-      {/* Left Sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 h-screen fixed top-0 left-0">
-        <SidebarLeft />
-      </aside>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
 
-      {/* Left Sidebar for mobile (top-right) */}
-      <div className="md:hidden fixed top-16 right-4 z-[9999]">
-        <SidebarLeft />
+      {/* NAVBAR */}
+      <Navbar />
+
+      {/* MAIN LAYOUT */}
+      <div className="flex pt-14">
+
+        {/* LEFT SIDEBAR */}
+        <div className="hidden md:block">
+          <SidebarLeft />
+        </div>
+
+        {/* CONTENT AREA */}
+        <div className="flex-1">
+          <MiddleContent />
+        </div>
+
+        <div className="hidden lg:block">
+          {/* RIGHT SIDEBAR */}
+          <SidebarRight />
+        </div>
+
       </div>
 
-      {/* Middle Content fetches posts from backend */}
-      <MiddleContent className="flex-1 mx-auto md:ml-64 md:mr-64" />
-
-      {/* Right Sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 h-screen fixed top-0 right-0">
-        <SidebarRight />
-      </aside>
     </div>
   );
 }

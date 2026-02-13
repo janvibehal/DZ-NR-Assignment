@@ -1,6 +1,7 @@
 import './globals.css';
 import { ReactNode } from 'react';
 import { AuthProvider } from '../context/AuthContext';
+import ClientWrapper from '../components/animations/homepage/ClientWrapper';
 
 export const metadata = {
   title: 'DZINR App',
@@ -9,13 +10,36 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 dark:bg-[#0a0a0a] min-h-screen">
+    <html lang="en" className="overflow-hidden">
+      <body
+        className="
+          bg-gray-50 dark:bg-[#0a0a0a]
+          h-screen
+          w-screen
+          overflow-hidden
+        "
+      >
+
         <AuthProvider>
-          <main className="w-full min-h-screen p-4 fixed">
-            {children}
-          </main>
+
+          <ClientWrapper>
+
+            {/* MAIN APP VIEWPORT */}
+            <main
+              className="
+                w-full
+                h-full
+                overflow-hidden
+                relative
+              "
+            >
+              {children}
+            </main>
+
+          </ClientWrapper>
+
         </AuthProvider>
+
       </body>
     </html>
   );

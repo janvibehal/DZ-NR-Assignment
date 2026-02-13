@@ -160,150 +160,178 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
     );
 
   return (
-    <div className="bg-white dark:bg-[#131313] rounded-lg shadow-lg dark:shadow-2xl p-4 w-full mx-auto border border-gray-200 dark:border-gray-700 mb-6">
-      <div className="flex items-center mb-3">
-        <img
-          src={post.userAvatarUrl}
-          alt={`${post.name}'s avatar`}
-          className="w-10 h-10 rounded-lg object-cover mr-3 ring-1 ring-gray-300 dark:ring-gray-600"
-        />
-        <div>
-          <div className="text-gray-900 dark:text-white font-semibold text-sm">
-            {post.name}
-            {post.feeling && (
-              <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
-                is feeling {post.feeling}{" "}
-                {post.feeling === "excited" ? "🤩" : ""}
-              </span>
-            )}
-            {post.withUser && (
-              <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
-                with <span className="font-semibold">{post.withUser}</span>
-              </span>
-            )}
-          </div>
-          <div className="text-gray-500 dark:text-gray-400 text-xs">
-            {post.postDate}
-          </div>
-        </div>
-      </div>
-
-      <p className="text-gray-800 dark:text-gray-200 mb-3 text-sm whitespace-pre-wrap">
-        {post.postText}
-      </p>
-
-      {post.media.length > 0 && (
-        <div
-          className={`grid gap-2 mb-4 ${
-            post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"
-          }`}
-        >
-          {post.media.map((item) => (
-            <div key={item.id} className="relative w-full h-52">
-              {item.type === "video" ? (
-                <video
-                  controls
-                  src={item.url}
-                  className="w-full h-full object-cover rounded-md"
-                />
-              ) : (
-                <img
-                  src={item.url}
-                  alt={item.type}
-                  className="w-full h-full object-cover rounded-md"
-                />
+    <div
+      className="
+  relative
+  rounded-xl
+  p-[1px]
+  mb-6
+  bg-gradient-to-b
+  from-orange-500/20
+  via-transparent
+  to-transparent
+"
+    >
+      {/* Card Content */}
+      <div
+        className="
+    bg-[#0c0c0c]
+    backdrop-blur-xl
+    rounded-xl
+    shadow-2xl
+    border border-white/5
+    p-4
+    w-full
+    mx-auto
+    relative
+    overflow-hidden
+  "
+      >
+        <div className="flex items-center mb-3">
+          <img
+            src={post.userAvatarUrl}
+            alt={`${post.name}'s avatar`}
+            className="w-10 h-10 rounded-lg object-cover mr-3 ring-1 ring-gray-300 dark:ring-gray-600"
+          />
+          <div>
+            <div className="text-gray-900 dark:text-white font-semibold text-sm">
+              {post.name}
+              {post.feeling && (
+                <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
+                  is feeling {post.feeling}{" "}
+                  {post.feeling === "excited" ? "🤩" : ""}
+                </span>
+              )}
+              {post.withUser && (
+                <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
+                  with <span className="font-semibold">{post.withUser}</span>
+                </span>
               )}
             </div>
-          ))}
+            <div className="text-gray-500 dark:text-gray-400 text-xs">
+              {post.postDate}
+            </div>
+          </div>
         </div>
-      )}
 
-      <div className="flex justify-around border-t border-b border-gray-200 dark:border-gray-700 py-2 mb-3">
-        <button
-          onClick={togglePostLike}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
-            postLiked
-              ? "text-red-500 hover:text-red-600 dark:hover:text-red-400"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-          }`}
-        >
-          <Heart
-            className="w-5 h-5"
-            fill={postLiked ? "currentColor" : "none"}
-          />
-          <span className="text-sm font-medium">
-            {postLiked ? "Liked" : "Like"}
-          </span>
-        </button>
+        <p className="text-gray-800 dark:text-gray-200 mb-3 text-sm whitespace-pre-wrap">
+          {post.postText}
+        </p>
 
-        <button
-          onClick={() => setShowComments((prev) => !prev)}
-          className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-md transition duration-150"
-        >
-          <MessageCircle className="w-5 h-5" />
-          <span className="text-sm font-medium">Comment</span>
-        </button>
+        {post.media.length > 0 && (
+          <div
+            className={`grid gap-2 mb-4 ${
+              post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"
+            }`}
+          >
+            {post.media.map((item) => (
+              <div key={item.id} className="relative w-full h-52">
+                {item.type === "video" ? (
+                  <video
+                    controls
+                    src={item.url}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                ) : (
+                  <img
+                    src={item.url}
+                    alt={item.type}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
-        <button
-          disabled={sharing}
-          onClick={async () => {
-            setSharing(true);
-            const postUrl = window.location.href;
-            const shareText = `Check out this post by ${post.name}: ${post.postText}`;
-            try {
-              if (navigator.share) {
-                await navigator.share({
-                  title: `Post by ${post.name}`,
-                  text: shareText,
-                  url: postUrl,
-                });
-              } else {
-                const tempInput = document.createElement("textarea");
-                tempInput.value = `${shareText}\n${postUrl}`;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempInput);
-                alert("Post link and text copied to clipboard!");
-              }
-            } catch (err) {
-              console.log(err);
-            }
-            setSharing(false);
-          }}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
-            sharing
-              ? "text-gray-400 cursor-not-allowed"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-          }`}
-        >
-          <Share2 className="w-5 h-5" />
-          <span className="text-sm font-medium">Share</span>
-        </button>
-      </div>
-
-      <div className="flex items-center text-gray-700 dark:text-gray-300 text-xs mb-3">
-        {totalLikesCount > 0 && (
-          <>
-            <Heart className="w-3 h-3 mr-1 text-red-500 fill-current" />
-            <span className="font-semibold">
-              {postLiked && `You${likedNames.length > 0 ? ", " : ""}`}
-              {likedNames.length > 0 && likedNames.slice(0, 2).join(", ")}
-              {likedNames.length > 2 && ` and ${likedNames.length - 2} others`}
+        <div className="flex justify-around border-t border-b border-gray-200 dark:border-gray-700 py-2 mb-3">
+          <button
+            onClick={togglePostLike}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
+              postLiked
+                ? "text-red-500 hover:text-red-600 dark:hover:text-red-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+            }`}
+          >
+            <Heart
+              className="w-5 h-5"
+              fill={postLiked ? "currentColor" : "none"}
+            />
+            <span className="text-sm font-medium">
+              {postLiked ? "Liked" : "Like"}
             </span>
-            <span className="ml-1"> liked this.</span>
-          </>
+          </button>
+
+          <button
+            onClick={() => setShowComments((prev) => !prev)}
+            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-md transition duration-150"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-sm font-medium">Comment</span>
+          </button>
+
+          <button
+            disabled={sharing}
+            onClick={async () => {
+              setSharing(true);
+              const postUrl = window.location.href;
+              const shareText = `Check out this post by ${post.name}: ${post.postText}`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({
+                    title: `Post by ${post.name}`,
+                    text: shareText,
+                    url: postUrl,
+                  });
+                } else {
+                  const tempInput = document.createElement("textarea");
+                  tempInput.value = `${shareText}\n${postUrl}`;
+                  document.body.appendChild(tempInput);
+                  tempInput.select();
+                  document.execCommand("copy");
+                  document.body.removeChild(tempInput);
+                  alert("Post link and text copied to clipboard!");
+                }
+              } catch (err) {
+                console.log(err);
+              }
+              setSharing(false);
+            }}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
+              sharing
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+            }`}
+          >
+            <Share2 className="w-5 h-5" />
+            <span className="text-sm font-medium">Share</span>
+          </button>
+        </div>
+
+        <div className="flex items-center text-gray-700 dark:text-gray-300 text-xs mb-3">
+          {totalLikesCount > 0 && (
+            <>
+              <Heart className="w-3 h-3 mr-1 text-red-500 fill-current" />
+              <span className="font-semibold">
+                {postLiked && `You${likedNames.length > 0 ? ", " : ""}`}
+                {likedNames.length > 0 && likedNames.slice(0, 2).join(", ")}
+                {likedNames.length > 2 &&
+                  ` and ${likedNames.length - 2} others`}
+              </span>
+              <span className="ml-1"> liked this.</span>
+            </>
+          )}
+        </div>
+
+        {showComments && (
+          <Comment
+            currentUserCommentAvatar={`https://placehold.co/50x50/3498db/ffffff?text=${
+              user?.name?.charAt(0) || "U"
+            }`}
+            postId={postId}
+          />
         )}
       </div>
-
-      {showComments && (
-        <Comment
-          currentUserCommentAvatar={`https://placehold.co/50x50/3498db/ffffff?text=${
-            user?.name?.charAt(0) || "U"
-          }`}
-          postId={postId}
-        />
-      )}
     </div>
   );
 };

@@ -1,97 +1,46 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit } from "lucide-react";
-import PostContentModal, { MediaItem } from "./PostContentModal";
+import PostContentModal from "./PostContentModal";
 import { useAuth } from "../../context/AuthContext";
 
 const MOCK_AVATAR = "https://picsum.photos/40/40?random=1";
 
 const PostCreator: React.FC = () => {
   const [isPostModalOpen, setPostModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const { user } = useAuth();
-  const token = user?.token;
-
-  const handlePost = async (content: string, media?: MediaItem[]) => {
-    if (!user) {
-      alert("You must be logged in to post.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("text", content);
-
-      media?.forEach((item) => {
-        formData.append("mediaFile", item.file);
-        formData.append("mediaType", item.type);
-      });
-
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        body: formData,
-        headers: token
-          ? {
-              Authorization: `Bearer ${token}`,
-            }
-          : {},
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        console.log("Post created successfully:", data);
-        setPostModalOpen(false);
-      } else {
-        console.error("Error creating post:", data.message);
-        alert(`Failed to post: ${data.message}`);
-      }
-    } catch (err) {
-      console.error("Request failed:", err);
-      alert("Something went wrong while posting.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
-    <div className="bg-white dark:bg-[#131313] rounded-xs shadow-lg dark:shadow-2xl p-4 w-full mx-auto border border-gray-200 dark:border-gray-700">
-      <div className="flex justify-start border-b border-gray-200 dark:border-gray-700 pb-3 mb-3 text-sm md:text-base">
-        <div
-          className="flex items-center space-x-2 text-gray-900 dark:text-white font-semibold cursor-pointer p-2 rounded-md transition duration-150 relative after:absolute after:bottom-[-13px] after:left-0 after:right-0 after:h-0.5 after:bg-gray-900 dark:after:bg-white"
-          onClick={() => setPostModalOpen(true)}
-        >
-          <Edit className="w-5 h-5" />
-          <span>Make Post</span>
+    <>
+      {/* Trigger */}
+      <div
+        onClick={() => setPostModalOpen(true)}
+        className="
+          relative rounded-2xl
+          bg-black/40 backdrop-blur-2xl
+          border border-white/10
+          shadow-[0_10px_40px_rgba(0,0,0,0.6)]
+          p-4 cursor-pointer
+        "
+      >
+        <div className="flex items-center space-x-3">
+          <img
+            src={user?.avatarUrl || MOCK_AVATAR}
+            className="w-10 h-10 rounded-full"
+          />
+
+          <div className="text-gray-400">
+            Write something...
+          </div>
         </div>
       </div>
 
-      <div
-        className="flex space-x-3 items-start mb-4 cursor-text"
-        onClick={() => setPostModalOpen(true)}
-      >
-        <img
-          src={user?.avatarUrl || MOCK_AVATAR}
-          alt="User Avatar"
-          className="w-10 h-10 rounded-lg object-cover ring-2 ring-gray-400 dark:ring-gray-600"
-        />
-        <textarea
-          rows={3}
-          placeholder="What you doing? Where you at? Oh you got plans? Please share that!"
-          className="flex-1 bg-gray-100 dark:bg-gray-700 border-none rounded-md py-2 px-4 text-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 resize-none transition duration-150"
-          readOnly
-        />
-      </div>
-
+      {/* Popup */}
       <PostContentModal
         isOpen={isPostModalOpen}
         onClose={() => setPostModalOpen(false)}
-        onPost={handlePost} 
       />
-    </div>
+    </>
   );
 };
 

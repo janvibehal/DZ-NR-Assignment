@@ -33,7 +33,7 @@ const Navbar = () => {
             className="text-white font-bold text-xl cursor-pointer"
             onClick={() => router.push("/")}
           >
-            CHATTY
+            ADD LOGO HERE
           </div>
 
           {/* CENTER SEARCH */}

@@ -5,8 +5,8 @@ import ClientWrapper from '../components/animations/homepage/ClientWrapper';
 import MessagingWrapper from '../components/MessagingWrapper';
 
 export const metadata = {
-  title: 'DZINR App',
-  description: 'Next.js Fullstack App',
+  title: 'YapYard',
+  description: 'YapYard is a platform for creators to share their work and connect with their audience. Discover, support, and engage with your favorite creators all in one place.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

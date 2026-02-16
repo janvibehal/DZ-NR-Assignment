@@ -6,6 +6,7 @@ import Comment from "../comments/Comment";
 import PostCardSkeleton from "./PostCardSkeleton";
 import CommentSkeleton from "../comments/CommentSkeleton";
 import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface MediaItem {
   id: string;
@@ -26,10 +27,11 @@ interface CommentType {
 
 interface PostData {
   id: string;
+  authorId: string;
   userAvatarUrl: string;
   name: string;
   feeling?: string;
-  withUser?: string;
+  withUser?: any;
   postDate: string;
   postText: string;
   media: MediaItem[];
@@ -42,52 +44,71 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ postId }) => {
+
   const { user } = useAuth();
+  const router = useRouter();
+
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [post, setPost] = useState<PostData | null>(null);
 
-  const postLiked = post?.likes.some((like) => like._id === user?._id) || false;
-  const likedNames =
-    post?.likes
-      .filter((like) => like._id !== user?._id)
-      .map((like) => like.name) || [];
+  const postLiked =
+    post?.likes.some((like) => like._id === user?._id) || false;
+
   const totalLikesCount = post?.likes.length || 0;
 
   useEffect(() => {
+
     const fetchPost = async () => {
-      if (!postId || !user?.token) return;
+
+      if (!postId) return;
+
       try {
+
         setLoading(true);
+
         const res = await fetch(`/api/posts/${postId}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
+          headers: user?.token
+            ? { Authorization: `Bearer ${user.token}` }
+            : {},
         });
+
         if (!res.ok) throw new Error("Failed to fetch post");
+
         const data = await res.json();
         const postData = data.post || data;
 
         setPost({
           id: postData._id,
+          authorId: postData.author?._id,
+
           userAvatarUrl:
             postData.author?.avatarUrl ||
-            `https://placehold.co/50x50/3498db/ffffff?text=${
-              postData.author?.name?.charAt(0) || "U"
-            }`,
+            `https://picsum.photos/50?random=${postData._id}`,
+
           name: postData.author?.name || "Unknown User",
+
           feeling: postData.feeling,
-          withUser: postData.withUser,
+
+          withUser:
+            typeof postData.withUser === "object"
+              ? postData.withUser.name
+              : postData.withUser,
+
           postDate: new Date(postData.createdAt).toLocaleString(),
+
           postText: postData.text,
+
           media:
             postData.media?.map((m: any) => ({
               id: m._id,
               url: m.url,
               type: m.type,
             })) || [],
+
           likes: postData.likes || [],
+
           comments:
             postData.comments?.map((c: any) => ({
               id: c._id,
@@ -96,14 +117,13 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
                 name: c.author?.name || "Unknown",
                 avatarUrl:
                   c.author?.avatarUrl ||
-                  `https://placehold.co/50x50/3498db/ffffff?text=${
-                    c.author?.name?.charAt(0) || "U"
-                  }`,
+                  `https://picsum.photos/50?random=${c._id}`,
               },
               text: c.text,
               replies: c.replies || [],
             })) || [],
         });
+
       } catch (err) {
         console.error("Error fetching post:", err);
         setPost(null);
@@ -113,6 +133,7 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
     };
 
     fetchPost();
+
   }, [postId, user?.token]);
 
   const togglePostLike = async () => {
@@ -122,14 +143,17 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
 
     setPost((prev) => {
       if (!prev) return null;
+
       const updatedLikes = isLiked
         ? prev.likes.filter((like) => like._id !== user._id)
         : [...prev.likes, { _id: user._id, name: user.name }];
+
       return { ...prev, likes: updatedLikes };
     });
 
     try {
-      const res = await fetch(`/api/posts/${postId}/like`, {
+
+      await fetch(`/api/posts/${postId}/like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,17 +161,11 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
         },
         body: JSON.stringify({ userId: user._id }),
       });
-      if (!res.ok) throw new Error("Server failed to process like");
+
     } catch (err) {
+
       console.error("Failed to toggle like:", err);
 
-      setPost((prev) => {
-        if (!prev) return null;
-        const updatedLikes = isLiked
-          ? [...prev.likes, { _id: user._id, name: user.name }]
-          : prev.likes.filter((like) => like._id !== user._id);
-        return { ...prev, likes: updatedLikes };
-      });
     }
   };
 
@@ -160,72 +178,62 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
     );
 
   return (
-    <div
-      className="
-  relative
-  rounded-xl
-  p-[1px]
-  mb-6
-  bg-gradient-to-b
-  from-orange-500/20
-  via-transparent
-  to-transparent
-"
-    >
-      {/* Card Content */}
-      <div
-        className="
-    bg-[#0c0c0c]
-    backdrop-blur-xl
-    rounded-xl
-    shadow-2xl
-    border border-white/5
-    p-4
-    w-full
-    mx-auto
-    relative
-    overflow-hidden
-  "
-      >
+    <div className="relative rounded-xl p-[1px] mb-6 bg-gradient-to-b from-orange-500/20 via-transparent to-transparent">
+
+      <div className="bg-[#0c0c0c] backdrop-blur-xl rounded-xl shadow-2xl border border-white/5 p-4 w-full mx-auto relative overflow-hidden">
+
+        {/* HEADER */}
         <div className="flex items-center mb-3">
+
           <img
             src={post.userAvatarUrl}
-            alt={`${post.name}'s avatar`}
-            className="w-10 h-10 rounded-lg object-cover mr-3 ring-1 ring-gray-300 dark:ring-gray-600"
+            className="w-10 h-10 rounded-lg object-cover mr-3 cursor-pointer"
+            onClick={() => router.push(`/profile/${post.authorId}`)}
           />
-          <div>
-            <div className="text-gray-900 dark:text-white font-semibold text-sm">
+
+          <div
+            className="cursor-pointer"
+            onClick={() => router.push(`/profile/${post.authorId}`)}
+          >
+            <div className="text-white font-semibold text-sm">
+
               {post.name}
+
               {post.feeling && (
-                <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
-                  is feeling {post.feeling}{" "}
-                  {post.feeling === "excited" ? "🤩" : ""}
+                <span className="ml-1 text-gray-300">
+                  is feeling {post.feeling}
                 </span>
               )}
+
               {post.withUser && (
-                <span className="ml-1 text-gray-700 dark:text-gray-300 font-normal">
+                <span className="ml-1 text-gray-300">
                   with <span className="font-semibold">{post.withUser}</span>
                 </span>
               )}
+
             </div>
-            <div className="text-gray-500 dark:text-gray-400 text-xs">
+
+            <div className="text-gray-400 text-xs">
               {post.postDate}
             </div>
           </div>
+
         </div>
 
-        <p className="text-gray-800 dark:text-gray-200 mb-3 text-sm whitespace-pre-wrap">
+        {/* TEXT */}
+        <p className="text-gray-200 mb-3 text-sm whitespace-pre-wrap">
           {post.postText}
         </p>
 
+        {/* MEDIA */}
         {post.media.length > 0 && (
-          <div
-            className={`grid gap-2 mb-4 ${
-              post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"
-            }`}
-          >
+
+          <div className={`grid gap-2 mb-4 ${post.media.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+
             {post.media.map((item) => (
+
               <div key={item.id} className="relative w-full h-52">
+
                 {item.type === "video" ? (
                   <video
                     controls
@@ -235,102 +243,49 @@ const PostCard: React.FC<PostCardProps> = ({ postId }) => {
                 ) : (
                   <img
                     src={item.url}
-                    alt={item.type}
                     className="w-full h-full object-cover rounded-md"
                   />
                 )}
+
               </div>
             ))}
+
+          </div>
+
+        )}
+
+        {/* ACTION BAR */}
+        <div className="flex justify-around border-y border-white/10 py-2 mb-3">
+
+          <button onClick={togglePostLike} className={postLiked ? "text-red-500":"text-gray-400"}>
+            <Heart fill={postLiked ? "currentColor":"none"} />
+          </button>
+
+          <button onClick={()=>setShowComments(!showComments)}>
+            <MessageCircle />
+          </button>
+
+          <button disabled={sharing}>
+            <Share2 />
+          </button>
+
+        </div>
+
+        {/* LIKES */}
+        {totalLikesCount > 0 && (
+          <div className="text-xs text-gray-300 mb-3">
+            ❤️ {totalLikesCount} likes
           </div>
         )}
 
-        <div className="flex justify-around border-t border-b border-gray-200 dark:border-gray-700 py-2 mb-3">
-          <button
-            onClick={togglePostLike}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
-              postLiked
-                ? "text-red-500 hover:text-red-600 dark:hover:text-red-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Heart
-              className="w-5 h-5"
-              fill={postLiked ? "currentColor" : "none"}
-            />
-            <span className="text-sm font-medium">
-              {postLiked ? "Liked" : "Like"}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setShowComments((prev) => !prev)}
-            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-md transition duration-150"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">Comment</span>
-          </button>
-
-          <button
-            disabled={sharing}
-            onClick={async () => {
-              setSharing(true);
-              const postUrl = window.location.href;
-              const shareText = `Check out this post by ${post.name}: ${post.postText}`;
-              try {
-                if (navigator.share) {
-                  await navigator.share({
-                    title: `Post by ${post.name}`,
-                    text: shareText,
-                    url: postUrl,
-                  });
-                } else {
-                  const tempInput = document.createElement("textarea");
-                  tempInput.value = `${shareText}\n${postUrl}`;
-                  document.body.appendChild(tempInput);
-                  tempInput.select();
-                  document.execCommand("copy");
-                  document.body.removeChild(tempInput);
-                  alert("Post link and text copied to clipboard!");
-                }
-              } catch (err) {
-                console.log(err);
-              }
-              setSharing(false);
-            }}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-150 ${
-              sharing
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Share2 className="w-5 h-5" />
-            <span className="text-sm font-medium">Share</span>
-          </button>
-        </div>
-
-        <div className="flex items-center text-gray-700 dark:text-gray-300 text-xs mb-3">
-          {totalLikesCount > 0 && (
-            <>
-              <Heart className="w-3 h-3 mr-1 text-red-500 fill-current" />
-              <span className="font-semibold">
-                {postLiked && `You${likedNames.length > 0 ? ", " : ""}`}
-                {likedNames.length > 0 && likedNames.slice(0, 2).join(", ")}
-                {likedNames.length > 2 &&
-                  ` and ${likedNames.length - 2} others`}
-              </span>
-              <span className="ml-1"> liked this.</span>
-            </>
-          )}
-        </div>
-
+        {/* COMMENTS */}
         {showComments && (
           <Comment
-            currentUserCommentAvatar={`https://placehold.co/50x50/3498db/ffffff?text=${
-              user?.name?.charAt(0) || "U"
-            }`}
+            currentUserCommentAvatar={`https://picsum.photos/50?random=1`}
             postId={postId}
           />
         )}
+
       </div>
     </div>
   );

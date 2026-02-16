@@ -6,7 +6,12 @@ import { useAuth } from "../../context/AuthContext";
 
 const MOCK_AVATAR = "https://picsum.photos/40/40?random=1";
 
-const PostCreator: React.FC = () => {
+interface Props {
+  onPostCreated: () => void;
+}
+
+const PostCreator: React.FC<Props> = ({ onPostCreated }) => {
+
   const [isPostModalOpen, setPostModalOpen] = useState(false);
   const { user } = useAuth();
 
@@ -39,6 +44,7 @@ const PostCreator: React.FC = () => {
       <PostContentModal
         isOpen={isPostModalOpen}
         onClose={() => setPostModalOpen(false)}
+        onPostCreated={onPostCreated}
       />
     </>
   );

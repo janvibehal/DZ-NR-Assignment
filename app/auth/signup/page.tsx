@@ -83,7 +83,7 @@ export default function SignupPage() {
     }
     setLoading(true);
     try {
-      await register(name, email, password); 
+      await register(name, email, password);
       setMessage({ type: "success", text: "Account created successfully!" });
       setTimeout(() => router.push("/auth/login"), 1500);
     } catch (err: any) {
@@ -94,28 +94,48 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center w-full font-sans">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden md:h-full lg:max-h-[800px] lg:h-[80vh] m-4">
-        <div
-          className="relative md:w-1/2 p-8 flex flex-col justify-between bg-cover bg-center rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none min-h-[300px] md:min-h-full"
-          style={{
-            backgroundImage:
-              "url('https://picsum.photos/800/1200?grayscale&blur=1&random=2')",
-            backgroundSize: "cover",
-          }}
-        ></div>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* VIDEO BACKGROUND */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/videos/login-bg.mp4" type="video/mp4" />
+      </video>
 
+      {/* DARK OVERLAY */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* MAIN CONTAINER */}
+      <div
+        className="relative z-10 flex flex-col md:flex-row w-full max-w-5xl
+                    bg-white/20 backdrop-blur-2xl border border-white/30
+                    rounded-3xl shadow-2xl overflow-hidden
+                    md:h-full lg:max-h-[800px] lg:h-[80vh] m-4"
+      >
+        {/* LEFT VISUAL (optional text area) */}
+        <div className="hidden md:flex md:w-1/2 items-center justify-center p-10 text-white">
+          <div>
+            <h2 className="text-3xl font-semibold mb-3">Join Us</h2>
+            <p className="text-sm text-white/80">
+              Create your account and start your journey today.
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT FORM */}
         <div className="md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center">
-          <header className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Create Account
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
+          <header className="mb-8 text-white">
+            <h2 className="text-2xl font-semibold">Create Account</h2>
+            <p className="text-sm text-white/80 mt-1">
               Sign up to start your journey.
             </p>
           </header>
 
-          <form onSubmit={handleSignup} className="space-y-6 text-gray-400">
+          <form onSubmit={handleSignup} className="space-y-6">
             <AuthInput
               type="text"
               placeholder="Name"
@@ -123,6 +143,7 @@ export default function SignupPage() {
               onChange={(e) => setName(e.target.value)}
               Icon={User}
             />
+
             <AuthInput
               type="email"
               placeholder="Email"
@@ -130,6 +151,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               Icon={User}
             />
+
             <AuthInput
               type="password"
               placeholder="Password"
@@ -137,6 +159,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               Icon={Lock}
             />
+
             <AuthInput
               type="password"
               placeholder="Confirm Password"
@@ -149,31 +172,25 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-3 px-4 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-700 transition duration-150 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 bg-white/20 backdrop-blur-md border border-white/30
+                         text-white font-medium rounded-xl hover:bg-white/30 transition"
               >
                 {loading ? "Signing up..." : "Sign up"}
               </button>
 
               <Link
                 href="/auth/login"
-                className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition duration-150 text-center"
+                className="flex-1 py-3 px-4 border border-white/30 text-white
+                         font-medium rounded-xl hover:bg-white/10 transition text-center"
               >
                 Login
               </Link>
             </div>
           </form>
 
-          <p className="mt-8 text-center text-xs text-gray-400">
+          <p className="mt-8 text-center text-xs text-white/70">
             By signing up, you agree to our terms and conditions and privacy
             policy.
-            <br />
-            <a href="#" className="hover:text-gray-700 font-medium">
-              Terms & Conditions
-            </a>{" "}
-            |{" "}
-            <a href="#" className="hover:text-gray-700 font-medium">
-              Privacy Policy
-            </a>
           </p>
         </div>
       </div>

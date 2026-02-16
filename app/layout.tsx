@@ -1,42 +1,29 @@
 import './globals.css';
 import { ReactNode } from 'react';
+
 import { AuthProvider } from '../context/AuthContext';
 import ClientWrapper from '../components/animations/homepage/ClientWrapper';
+import MessagingWrapper from '../components/Messages/MessagingWrapper';
 
-export const metadata = {
-  title: 'DZINR App',
-  description: 'Next.js Fullstack App',
-};
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+
   return (
-    <html lang="en" className="overflow-hidden">
-      <body
-        className="
-          bg-gray-50 dark:bg-[#0a0a0a]
-          h-screen
-          w-screen
-          overflow-hidden
-        "
-      >
+    <html lang="en">
+      <body className="bg-gray-50 dark:bg-[#0a0a0a]">
 
         <AuthProvider>
 
           <ClientWrapper>
 
-            {/* MAIN APP VIEWPORT */}
-            <main
-              className="
-                w-full
-                h-full
-                overflow-hidden
-                relative
-              "
-            >
+            <LayoutWrapper>
               {children}
-            </main>
+            </LayoutWrapper>
 
           </ClientWrapper>
+
+          <MessagingWrapper />
 
         </AuthProvider>
 

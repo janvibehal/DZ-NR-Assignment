@@ -7,12 +7,13 @@ import { useAuth } from "../../context/AuthContext";
 
 interface PostFromBackend {
   _id: string;
-  author: { name: string; avatarUrl: string };
-  feeling?: string;
-  withUser?: string;
+  title?: string;
+  content: string;
+  authorId: {
+    name: string;
+    email: string;
+  };
   createdAt: string;
-  text: string;
-  media?: { _id: string; url: string; type: "image" | "video" }[];
 }
 
 const MiddleContent: React.FC<{ className?: string }> = ({ className }) => {
@@ -21,73 +22,79 @@ const MiddleContent: React.FC<{ className?: string }> = ({ className }) => {
   const [posts, setPosts] = useState<PostFromBackend[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ⭐ FETCH POSTS ONLY IF LOGGED IN
+  const fetchPosts = async () => {
+    if (!user) return; // 🔥 STOP if not logged in
+
+    try {
+      setLoading(true);
+
+      const token = user?.token;
+
+      const res = await fetch("/api/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      setPosts(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-
-        const res = await fetch("/api/posts", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch posts");
-
-        const data = await res.json();
-        setPosts(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
+    if (user) {
+      fetchPosts();
+    }
+  }, [user]);
 
   return (
     <main
       className={`
         ${className}
-        flex-1 h-screen overflow-y-auto
+        flex-1 min-h-full overflow-y-auto
         scrollbar-custom relative
       `}
     >
-      {/* BACKGROUND IMAGE */}
-      <div
-        className="absolute inset-0 -z-20 bg-center bg-cover opacity-30"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop')",
-        }}
-      />
+      {/* BACKGROUND WRAPPER */}
+      <div className="absolute inset-0 -z-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-black" />
 
-      {/* GLASS BLUR */}
-      <div className="absolute inset-0 backdrop-blur-3xl -z-10" />
+        <div
+          className="
+            absolute bottom-[-200px] left-1/2 -translate-x-1/2
+            w-[1200px] h-[600px]
+            bg-orange-500/25
+            blur-[140px]
+          "
+        />
 
-      {/* ORANGE GLOW */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="
-          absolute bottom-0 left-1/2 -translate-x-1/2
-          w-[1200px] h-[500px]
-          bg-gradient-to-t
-          from-orange-500/40 via-orange-400/20 to-transparent
-          blur-3xl opacity-70
-        " />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
       </div>
 
-      {/* CENTER FEED */}
-      <div className="relative w-full px-6 py-6 space-y-6">
-        <PostCreator />
+      {/* ⭐ IF NOT LOGGED IN → HIDE POSTS */}
+      {!user ? (
+        <div className="relative flex items-center justify-center h-full text-gray-400 pt-10">
+          Please login to view/create posts 🙂
+        </div>
+      ) : (
+        <div className="relative w-full px-6 py-6 space-y-6">
+          <PostCreator onPostCreated={fetchPosts} />
 
-        {loading
-          ? Array.from({ length: 3 }).map((_, idx) => (
-              <PostCard key={idx} postId="" />
-            ))
-          : posts.map((post) => (
-              <PostCard key={post._id} postId={post._id} />
-            ))}
-      </div>
+          {loading
+            ? Array.from({ length: 3 }).map((_, idx) => (
+                <PostCard key={idx} postId="" />
+              ))
+            : posts.map((post) => (
+                <PostCard key={post._id} postId={post._id} />
+              ))}
+        </div>
+      )}
     </main>
   );
 };

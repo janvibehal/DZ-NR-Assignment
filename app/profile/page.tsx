@@ -14,10 +14,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 
-  // ✅ FETCH PROFILE DATA
-  const fetchProfile = async () => {
+  /* =========================
+     FETCH PROFILE
+  ========================= */
+  const fetchProfile = async (userId: string) => {
     try {
-      const res = await fetch(`/api/users/${user._id}`);
+      const res = await fetch(`/api/users/${userId}`);
       const data = await res.json();
       setProfile(data);
     } catch (err) {
@@ -25,10 +27,12 @@ export default function ProfilePage() {
     }
   };
 
-  // ✅ FETCH USER POSTS
-  const fetchPosts = async () => {
+  /* =========================
+     FETCH POSTS
+  ========================= */
+  const fetchPosts = async (userId: string) => {
     try {
-      const res = await fetch(`/api/posts/user/${user._id}`);
+      const res = await fetch(`/api/posts/user/${userId}`);
       const data = await res.json();
       setPosts(data);
     } catch (err) {
@@ -38,15 +42,19 @@ export default function ProfilePage() {
     }
   };
 
-  // ✅ LOAD DATA ON PAGE LOAD
+  /* =========================
+     LOAD DATA
+  ========================= */
   useEffect(() => {
-    if (!user?._id) return;
+    if (!user) return;
 
-    fetchProfile();
-    fetchPosts();
+    fetchProfile(user._id);
+    fetchPosts(user._id);
   }, [user]);
 
-  // ✅ NOT LOGGED IN
+  /* =========================
+     NOT LOGGED IN
+  ========================= */
   if (!user) {
     return (
       <div className="pt-24 text-center text-gray-400">
@@ -65,7 +73,7 @@ export default function ProfilePage() {
             profile={profile}
             userId={user._id}
             postsCount={posts.length}
-            refreshProfile={fetchProfile}
+            refreshProfile={() => fetchProfile(user._id)}
             onEdit={() => setShowEdit(true)}
           />
         )}
@@ -75,7 +83,7 @@ export default function ProfilePage() {
           <EditProfileModal
             profile={profile}
             onClose={() => setShowEdit(false)}
-            onSave={(updatedProfile) => {
+            onSave={(updatedProfile: any) => {
               setProfile(updatedProfile);
               setShowEdit(false);
             }}
@@ -95,9 +103,8 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* POSTS CARD */}
+        {/* POSTS */}
         <div className="bg-[#111] rounded-xl border border-white/10 p-6">
-
           {loading && (
             <div className="text-center text-gray-400 py-10">
               Loading posts...
